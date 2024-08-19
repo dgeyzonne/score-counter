@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compteur de Points</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="score.js"></script>
+</head>
+<body>
+
+    <h1>Compteur de Points</h1>
+
+    <div class="horizontal-buttons">
+        <button class="add-player-btn" onclick="openModal()"><i class="fas fa-user-plus"></i></button>
+        <button class="add-round-btn" onclick="addRound()"><i class="fas fa-plus"></i> Tour</button>
+        <button class="options-btn" onclick="openOptionsModal()"><i class="fas fa-cog"></i></button>
+        <button class="end-game-btn" onclick="showRanking()"><i class="fas fa-list-ol"></i></button>
+    </div>
+
+    <div class="table-container" id="tableContainer">
+        <table id="scoreTable">
+            <thead>
+                <tr class="fixed-header">
+                    <th></th> <!-- En-tête vide pour la colonne des tours -->
+                    <!-- Pas de joueur par défaut -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>#1</td>
+                    <!-- Pas de colonne de joueur par défaut -->
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="fixed-footer">
+                    <td>Total</td>
+                    <!-- Pas de total par défaut -->
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Modal pour ajouter un joueur -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <h2>Ajouter un joueur</h2>
+            <input type="text" id="playerName" placeholder="Nom du joueur" />
+            <div class="color-picker">
+                <div style="background-color: #2c3e50;" onclick="selectColor('#2c3e50')"></div>
+                <div style="background-color: #34495e;" onclick="selectColor('#34495e')"></div>
+                <div style="background-color: #4a54f1;" onclick="selectColor('#4a54f1')"></div> <!-- Bleu foncé -->
+                <div style="background-color: #2980b9;" onclick="selectColor('#2980b9')"></div>
+                <div style="background-color: #3498db;" onclick="selectColor('#3498db')"></div>
+                <div style="background-color: #2ecc71;" onclick="selectColor('#2ecc71')"></div>
+                <div style="background-color: #27ae60;" onclick="selectColor('#27ae60')"></div>
+                <div style="background-color: #16a085;" onclick="selectColor('#16a085')"></div>
+                <div style="background-color: #006400;" onclick="selectColor('#006400')"></div> <!-- Vert foncé -->
+                <div style="background-color: #1abc9c;" onclick="selectColor('#1abc9c')"></div>
+                <div style="background-color: #8e44ad;" onclick="selectColor('#8e44ad')"></div>
+                <div style="background-color: #9b59b6;" onclick="selectColor('#9b59b6')"></div>
+                <div style="background-color: #f6c1c1;" onclick="selectColor('#f6c1c1')"></div> <!-- Rose clair -->
+                <div style="background-color: #f48fb1;" onclick="selectColor('#f48fb1')"></div> <!-- Rose pastel -->
+                <div style="background-color: #e74c3c;" onclick="selectColor('#e74c3c')"></div>
+                <div style="background-color: #c0392b;" onclick="selectColor('#c0392b')"></div>
+                <div style="background-color: #f39c12;" onclick="selectColor('#f39c12')"></div>
+                <div style="background-color: #d35400;" onclick="selectColor('#d35400')"></div>
+                <div style="background-color: #e67e22;" onclick="selectColor('#e67e22')"></div>
+                <div style="background-color: #e74c3c;" onclick="selectColor('#e74c3c')"></div>
+                <div style="background-color: #a1887f;" onclick="selectColor('#a1887f')"></div> <!-- Marron moyen pastel -->
+                <div style="background-color: #6d4c41;" onclick="selectColor('#6d4c41')"></div> <!-- Marron foncé pastel -->
+            </div>
+            <div class="horizontal-buttons">
+                <button class="add-btn" onclick="addPlayer()">Ajouter</button>
+                <button class="cancel-btn" onclick="closeModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour le classement -->
+    <div id="rankingModal" class="modal">
+        <div class="modal-content ranking-modal-content">
+            <h2>Classement</h2>
+            <div id="rankingList"></div>
+            <button class="cancel-btn" onclick="closeRankingModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal pour les options -->
+    <div id="optionsModal" class="modal">
+        <div class="modal-content">
+            <h2>Options</h2>
+            <table class="options-table">
+                <tr>
+                    <td>Score :</td>
+                    <td><button class="toggle-score-btn" onclick="toggleScoreMode()">Classique</button></td>
+                </tr>
+                <tr>
+                    <td>Points total par tour (optionnel) :</td>
+                    <td><input type="number" onchange="updateTotalPointsPerRound(this)" /></td>
+                </tr>
+            </table>
+            <button class="cancel-btn" onclick="closeOptionsModal()">Fermer</button>
+        </div>
+    </div>
+
+    <footer>
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="score.html" class="nav-item">
+                <i class="fas fa-gamepad"></i>
+                <span>Score</span>
+            </a>
+            <a href="game-list.html" class="nav-item">
+                <i class="fas fa-list"></i>
+                <span>Parties</span>
+            </a>
+        </nav>
+    </footer>
+</body>
+</html>

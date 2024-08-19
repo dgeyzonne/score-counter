@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Parties - Compteur de Points</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="game-list.js"></script>
+</head>
+<body>
+    <h1>Liste des Parties</h1>
+    <div class="games-table-container">
+        <table id="gamesTable">
+            <thead>
+                <tr class="fixed-header">
+                    <th>Date</th>
+                    <th>Meilleur Joueur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les parties seront insérées ici via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="score.html" class="nav-item">
+                <i class="fas fa-gamepad"></i>
+                <span>Score</span>
+            </a>
+            <a href="game-list.html" class="nav-item">
+                <i class="fas fa-list"></i>
+                <span>Parties</span>
+            </a>
+        </nav>
+    </footer>
+</body>
+</html>
