@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 2px 10px 10px 10px;
     background-color: #1e1e1e;
     color: #ffffff;
 }
@@ -238,7 +238,7 @@ footer {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    height: 60px;
+    height: 50px;
 }
 
 .nav-item {
@@ -247,7 +247,7 @@ footer {
     align-items: center;
     text-decoration: none;
     color: #fff;
-    font-size: 12px;
+    font-size: 11px;
     width: 33%;
 }
 
@@ -257,7 +257,7 @@ footer {
 
 .nav-item span {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .nav-item:hover {
