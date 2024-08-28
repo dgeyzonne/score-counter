@@ -15,7 +15,7 @@ function loadGamesList() {
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
-        dateTd.textContent = game.date;
+        dateTd.textContent = new Date(Number.parseInt(game.id)).toLocaleString();
         tr.appendChild(dateTd);
 
         // Calculer le meilleur joueur en fonction du mode
@@ -40,7 +40,7 @@ function loadGamesList() {
         actionsTd.innerHTML = `
             <button onclick="loadGame(${game.id})" class="load-btn">Charger</button>
             <button onclick="deleteGame(${game.id})" class="delete-btn">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-trash"></i>
             </button>
         `;
     
@@ -57,8 +57,14 @@ function loadGame(gameId) {
 
 function deleteGame(gameId) {
     const games = JSON.parse(localStorage.getItem('games')) || [];
-    const updatedGames = games.filter(game => game.id != gameId);
+    const updatedGames = games.filter(game => game.id != gameId && isNumeric(game.id));
 
     localStorage.setItem('games', JSON.stringify(updatedGames));
     loadGamesList(); // Recharger la liste des parties
+}
+
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
 }
