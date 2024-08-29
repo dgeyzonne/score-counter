@@ -2,11 +2,61 @@ let isInverseMode = false;
 let selectedColor = null;
 let totalPointsPerRound = null;
 let selectedPlayers = [];
+let gameName = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     currentGameId = localStorage.getItem('currentGameId');
-    loadScores();
+    const games = JSON.parse(localStorage.getItem('games')) || [];
+    const currentGame = games.find(game => game.id === currentGameId);
+
+    if (currentGame == null) {
+        openGameNameModal();
+    } else {
+        if (currentGame.name == null) {
+            openGameNameModal();
+        }
+        loadScores(currentGame);
+    }
 });
+
+function validateGameName() {
+    gameName = document.getElementById('gameName').value.trim();
+    const errorMessage = document.getElementById('gameNameErrorMessage');
+    errorMessage.innerHTML = '';
+
+    if (!gameName) {
+        errorMessage.innerHTML = 'Veuillez entrer un nom de jeu';
+        return;
+    }
+
+    const games = JSON.parse(localStorage.getItem('games')) || [];
+    let currentGame = games.find(game => game.id === currentGameId);
+    let isNewGame = false;
+
+    if (currentGame == null) {
+        isNewGame = true;
+        currentGame = {
+            id: currentGameId,
+            name: gameName,
+            players: [],
+            isInverseMode: isInverseMode
+        };
+
+        games.push(currentGame);
+    } else {
+        currentGame.name = gameName;
+    }
+
+    // Sauvegarde la liste des parties dans localStorage
+    localStorage.setItem('games', JSON.stringify(games));
+    closeGameNameModal();
+
+    if (isNewGame) {
+        openPlayersModal();
+    } else {
+        loadScores(currentGame);
+    }
+}
 
 function selectColor(color) {
     selectedColor = color;
@@ -154,6 +204,17 @@ function updateTotalPointsPerRound(input) {
     updateScore();
 }
 
+function openGameNameModal() {
+    document.getElementById('gameNameModal').style.display = 'flex';
+    // Réinitialiser les champs de la popin
+    document.getElementById('gameName').value = '';
+    document.getElementById('gameNameErrorMessage').innerHTML = '';
+}
+
+function closeGameNameModal() {
+    document.getElementById('gameNameModal').style.display = 'none';
+}
+
 function openPlayersModal() {
     loadPlayers();
     document.getElementById('playersModal').style.display = 'flex';
@@ -237,7 +298,7 @@ function saveScores() {
         const playerName = headerCell.querySelector("input").value;
         const playerColor = rgbToHex(headerCell.style.backgroundColor);
         const playerScores = Array.from(table.querySelectorAll(`tbody tr td:nth-child(${index + 2}) input`))
-            .map(input => parseInt(input.value) || 0);
+            .map(input => parseInt(input.value) || null);
 
         players.push({
             name: playerName,
@@ -245,23 +306,22 @@ function saveScores() {
             scores: playerScores
         });
     });
-
-    const gameData = {
-        id: currentGameId,
-        players: players,
-        isInverseMode: isInverseMode
-    };
-
-    // Récupère la liste des parties existantes
+    
     const games = JSON.parse(localStorage.getItem('games')) || [];
-    // Vérifie si la partie actuelle existe déjà dans la liste
-    const existingGameIndex = games.findIndex(game => game.id === currentGameId);
-    if (existingGameIndex !== -1) {
-        // Met à jour la partie existante
-        games[existingGameIndex] = gameData;
-    } else {
-        // Ajoute la nouvelle partie
+    const currentGame = games.find(game => game.id === currentGameId);
+
+    if (currentGame == null) {
+        const gameData = {
+            id: currentGameId,
+            name: gameName,
+            players: players,
+            isInverseMode: isInverseMode
+        };
+
         games.push(gameData);
+    } else {
+        currentGame.players = players;
+        currentGame.isInverseMode = isInverseMode;
     }
 
     // Sauvegarde la liste des parties dans localStorage
@@ -281,10 +341,7 @@ function rgbToHex(col) {
     return col;
 }
 
-function loadScores() {
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    const currentGame = games.find(game => game.id === currentGameId);
-
+function loadScores(currentGame) {
     if (currentGame) {
         const table = document.getElementById("scoreTable");
         const headerRow = table.querySelector("thead tr");

@@ -39,7 +39,19 @@
         </table>
     </div>
 
-    <!-- Nouvelle Popin pour lister les joueurs existants -->
+    <!-- Modal pour saisir le nom du jeu -->
+    <div id="gameNameModal" class="modal">
+        <div class="modal-content">
+            <h2>Nom du jeu</h2>
+            <div class="modal-content-body">
+                <input type="text" id="gameName" placeholder="Nom du jeu" />
+                <div id="gameNameErrorMessage" class="error-message"></div>
+            </div>
+            <button class="ok-btn" onclick="validateGameName()">OK</button>
+        </div>
+    </div>
+
+    <!-- Modal pour lister les joueurs -->
     <div id="playersModal" class="modal">
         <div class="modal-content">
             <div class="modal-content-body">
@@ -52,7 +64,7 @@
                 </div>
             </div>
             <div class="horizontal-buttons">
-                <button id="addSelectedPlayersButton" class="ok-btn" onclick="addSelectedPlayers()">Valider</button>
+                <button class="ok-btn" onclick="addSelectedPlayers()">Valider</button>
                 <button class="cancel-btn" onclick="closePlayersModal()">Fermer</button>
             </div>
         </div>

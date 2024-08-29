@@ -14,9 +14,9 @@ function loadGamesList() {
     games.forEach(game => {
         const tr = document.createElement('tr');
 
-        const dateTd = document.createElement('td');
-        dateTd.textContent = new Date(Number.parseInt(game.id)).toLocaleString();
-        tr.appendChild(dateTd);
+        const gameNameTd = document.createElement('td');
+        gameNameTd.innerHTML = `${game.name}<span class="game-date">${new Date(Number.parseInt(game.id)).toLocaleString()}<span>`;
+        tr.appendChild(gameNameTd);
 
         // Calculer le meilleur joueur en fonction du mode
         const bestPlayer = game.players.reduce((best, player) => {
