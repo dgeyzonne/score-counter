@@ -9,12 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const games = JSON.parse(localStorage.getItem('games')) || [];
     const currentGame = games.find(game => game.id === currentGameId);
 
-    if (currentGame == null) {
+    if (currentGame == null || !currentGame.name) {
         openGameNameModal();
     } else {
-        if (currentGame.name == null) {
-            openGameNameModal();
-        }
         loadScores(currentGame);
     }
 });
@@ -298,7 +295,7 @@ function saveScores() {
         const playerName = headerCell.querySelector("input").value;
         const playerColor = rgbToHex(headerCell.style.backgroundColor);
         const playerScores = Array.from(table.querySelectorAll(`tbody tr td:nth-child(${index + 2}) input`))
-            .map(input => parseInt(input.value) || null);
+            .map(input => input.value == "0" ? 0 : parseInt(input.value) || null);
 
         players.push({
             name: playerName,
@@ -347,6 +344,11 @@ function loadScores(currentGame) {
         const headerRow = table.querySelector("thead tr");
         const body = table.querySelector("tbody");
         const totalRow = table.querySelector("tfoot tr");
+
+        // Vider la table
+        headerRow.innerHTML = '<th></th>';
+        body.innerHTML = '';
+        totalRow.innerHTML = '<td>Total</td>';
 
         currentGame.players.forEach(player => {
             // Ajouter les headers pour chaque joueur
