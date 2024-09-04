@@ -138,21 +138,25 @@ function updateScore() {
         let roundTotalPoints = 0;
         let missingScoreInputs = [];
         let hasSomeInput = false;
+
         for (let i = 1; i < row.cells.length; i++) {
             let currentInput = row.cells[i].getElementsByTagName('input')[0];
-            const inputValue = parseInt(currentInput.value) || 0;
-            totals[i - 1].innerText = parseInt(totals[i - 1].innerText) + inputValue;
+            const score = parseInt(currentInput.value) || 0;
+            totals[i - 1].innerText = parseInt(totals[i - 1].innerText) + score;
+            currentInput.classList.remove('invalid-score');
+            currentInput.placeholder = "";
+            roundTotalPoints = roundTotalPoints + score;
 
             if (currentInput.value == "") {
+                // on liste les inputs sans score du tour
                 missingScoreInputs.push(currentInput);
             } else {
                 hasSomeInput = true;
             }
-            currentInput.classList.remove('invalid-score');
-            currentInput.placeholder = "";
-            roundTotalPoints = roundTotalPoints + inputValue;
         }
 
+        // Si paramètre "Nb points par tour" actif et qu'il ne manque qu'un score sur le tour
+        // on calcule la diff pour atteindre le nb de points paramétré, et on l'affiche en placeholder.
         if (totalPointsPerRound != null && missingScoreInputs.length == 1 && hasSomeInput) {
             missingScoreInputs[0].placeholder = `${totalPointsPerRound - roundTotalPoints}`;
         }
@@ -160,8 +164,7 @@ function updateScore() {
         // Si total de ligne incorrect
         if (totalPointsPerRound != null && missingScoreInputs.length == 0 && totalPointsPerRound != roundTotalPoints) {
             for (let i = 1; i < row.cells.length; i++) {
-                let currentInput = row.cells[i].getElementsByTagName('input')[0];
-                currentInput.classList.add('invalid-score');
+                row.cells[i].getElementsByTagName('input')[0].classList.add('invalid-score');
             }
         }
     });
@@ -171,22 +174,54 @@ function updateScore() {
 }
 
 function highlightBestScore() {
+    // Highlight le(s) meilleur(s) score(s) de la ligne total
     const table = document.getElementById("scoreTable");
     const totals = table.querySelectorAll("tfoot tr td span");
     let bestScores = [];
-    let bestScore = isInverseMode ? Infinity : -Infinity;
+    let currentBestScore = isInverseMode ? Infinity : -Infinity;
 
     totals.forEach(total => {
+        total.classList.remove('best-score');
         const score = parseInt(total.innerText);
-        if ((isInverseMode && score < bestScore) || (!isInverseMode && score > bestScore)) {
-            bestScore = score;
+        if ((isInverseMode && score < currentBestScore) || (!isInverseMode && score > currentBestScore)) {
+            currentBestScore = score;
             bestScores = [total];
-        } else if (score === bestScore) {
+        } else if (score === currentBestScore) {
             bestScores.push(total);
         }
     });
 
-    totals.forEach(total => total.className = bestScores.includes(total) ? 'best-score' : '');
+    bestScores.forEach(bestScore => bestScore.classList.add('best-score'));
+
+    // Highlight le(s) meilleur(s) score(s) de chaque tour
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        let rowBestScores = [];
+        let currentRowBestScore = isInverseMode ? Infinity : -Infinity;
+        let hasMissingScore = false;
+
+        for (let i = 1; i < row.cells.length; i++) {
+            let currentInput = row.cells[i].getElementsByTagName('input')[0];
+            const score = parseInt(currentInput.value) || 0;
+            currentInput.classList.remove('best-score');
+
+            if (currentInput.value != "") {
+                // on liste les meilleurs scores du tour
+                if ((isInverseMode && score < currentRowBestScore) || (!isInverseMode && score > currentRowBestScore)) {
+                    currentRowBestScore = score;
+                    rowBestScores = [currentInput];
+                } else if (score === currentRowBestScore) {
+                    rowBestScores.push(currentInput);
+                }
+            } else {
+                hasMissingScore = true;
+            }
+        }
+
+        if (!hasMissingScore) {
+            rowBestScores.forEach(rowBestScore => rowBestScore.classList.add('best-score'));
+        }
+    });
 }
 
 function toggleScoreMode() {

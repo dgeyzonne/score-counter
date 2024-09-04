@@ -151,7 +151,7 @@ button {
 
 .invalid-score {
     font-weight: bold;
-    color: orange;
+    color: orange !important;
 }
 
 .fixed-header {
