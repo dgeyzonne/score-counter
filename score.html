@@ -113,9 +113,18 @@
     <!-- Modal pour le classement -->
     <div id="rankingModal" class="modal">
         <div class="modal-content">
-            <h2>Classement</h2>
+            <h2 id="rankingModalTitle"></h2>
             <div id="rankingList" class="modal-content-body"></div>
             <button class="cancel-btn" onclick="closeRankingModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal pour la suppression d'un joueur de la partie -->
+    <div id="deletePlayerFromCurrentGameModal" class="modal">
+        <div class="modal-content">
+            <p>Êtes-vous sûr de vouloir supprimer ce joueur de la partie ?</p>
+            <button class="ok-btn" onclick="deletePlayerFromCurrentGame()">Oui</button>
+            <button class="cancel-btn" onclick="closeDeletePlayerFromCurrentGameModal()">Annuler</button>
         </div>
     </div>
 

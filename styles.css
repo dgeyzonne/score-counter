@@ -40,10 +40,6 @@ th {
     color: #fff;
 }
 
-.header-player-name {
-    font-size: small;
-}
-
 td {
     background-color: #2c2c2c;
 }
@@ -156,6 +152,7 @@ button {
 
 .score-header {
     height: 55px;
+    font-size: small;
 }
 
 .fixed-header {

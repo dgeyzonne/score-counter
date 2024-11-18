@@ -5,6 +5,7 @@ let selectedPlayers = [];
 let gameName = null;
 let currentGameId = null;
 let games = null;
+let playerToDelete = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     games = JSON.parse(localStorage.getItem('games')) || [];
@@ -42,6 +43,10 @@ function validateGameName() {
     closeGameNameModal();
 
     if (isNewGame) {
+        const table = document.getElementById("scoreTable");
+        const headerRow = table.querySelector("thead tr");
+        headerRow.innerHTML = `<th>${currentGame.name}</th>`;
+
         openPlayersModal();
     } else {
         loadScores(currentGame);
@@ -138,7 +143,7 @@ function createHeaderCell(player) {
             removeButton = document.createElement("span");
             removeButton.className = "header-player-delete-btn";
             removeButton.innerHTML = `
-                    <button onclick="deletePlayerFromCurrentGame(event, '${player.name}', '${player.color}')" class="delete-btn small-button">
+                    <button onclick="openDeletePlayerFromCurrentGameModal(event, '${player.name}', '${player.color}')" class="delete-btn small-button">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
@@ -152,14 +157,14 @@ function createHeaderCell(player) {
     return newHeaderCell;
 }
 
-function deletePlayerFromCurrentGame(event, name, color) {
-    event.stopPropagation();
-
+function deletePlayerFromCurrentGame() {
     const currentGame = getCurrentGame();
-    currentGame.players = currentGame.players.filter(player => player.name != name && player.color != color);
+    currentGame.players = currentGame.players.filter(player => player.name != playerToDelete.name && player.color != playerToDelete.color);
     // Sauvegarde la liste des parties dans localStorage
     localStorage.setItem('games', JSON.stringify(games));
 
+    playerToDelete = null;
+    closeDeletePlayerFromCurrentGameModal();
     loadScores(currentGame);
 }
 
@@ -321,7 +326,24 @@ function closeNewPlayerModal() {
     document.getElementById('newPlayerModal').style.display = 'none';
 }
 
+function openDeletePlayerFromCurrentGameModal(event, playerName, playerColor) {
+    event.stopPropagation();
+
+    const currentGame = getCurrentGame();
+    playerToDelete = currentGame.players.find(player => player.name == playerName && player.color == playerColor);
+    
+    document.getElementById('deletePlayerFromCurrentGameModal').style.display = 'flex';
+}
+
+function closeDeletePlayerFromCurrentGameModal() {
+    document.getElementById('deletePlayerFromCurrentGameModal').style.display = 'none';
+}
+
 function openRankingModal() {
+    const currentGame = getCurrentGame();
+    const rankingModalTitle = document.getElementById('rankingModalTitle');
+    rankingModalTitle.innerHTML = currentGame.name;
+    
     const table = document.getElementById("scoreTable");
     const rows = table.querySelectorAll("tfoot tr td span");
     const players = Array.from(rows).map((span, index) => ({
@@ -415,7 +437,7 @@ function loadScores(currentGame) {
         const totalRow = table.querySelector("tfoot tr");
 
         // Vider la table
-        headerRow.innerHTML = '<th></th>';
+        headerRow.innerHTML = `<th>${currentGame.name}</th>`;
         body.innerHTML = '';
         totalRow.innerHTML = '<td>Total</td>';
 
