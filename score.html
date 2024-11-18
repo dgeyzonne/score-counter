@@ -21,7 +21,7 @@
     <div class="table-container" id="tableContainer">
         <table id="scoreTable">
             <thead>
-                <tr class="fixed-header">
+                <tr class="fixed-header score-header">
                     <th></th> <!-- En-tête vide pour la colonne des tours -->
                     <!-- Pas de joueur par défaut -->
                 </tr>
@@ -77,7 +77,7 @@
         <div class="modal-content">
             <h2>Ajouter un joueur</h2>
             <div class="modal-content-body">
-                <input type="text" id="playerName" placeholder="Nom du joueur" />
+                <input type="text" id="playerName" placeholder="Nom du joueur" oninput="filterPlayerNameInput(this)" />
                 <div class="color-picker">
                     <div style="background-color: #2c3e50;" onclick="selectColor('#2c3e50')"></div>
                     <div style="background-color: #34495e;" onclick="selectColor('#34495e')"></div>
@@ -98,7 +98,6 @@
                     <div style="background-color: #f39c12;" onclick="selectColor('#f39c12')"></div>
                     <div style="background-color: #d35400;" onclick="selectColor('#d35400')"></div>
                     <div style="background-color: #e67e22;" onclick="selectColor('#e67e22')"></div>
-                    <div style="background-color: #e74c3c;" onclick="selectColor('#e74c3c')"></div>
                     <div style="background-color: #a1887f;" onclick="selectColor('#a1887f')"></div> <!-- Marron moyen pastel -->
                     <div style="background-color: #6d4c41;" onclick="selectColor('#6d4c41')"></div> <!-- Marron foncé pastel -->
                 </div>

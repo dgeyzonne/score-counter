@@ -38,7 +38,9 @@ function loadGamesList() {
         const actionsTd = document.createElement('td');
         actionsTd.className = 'actions-td';
         actionsTd.innerHTML = `
-            <button onclick="loadGame(${game.id})" class="load-btn">Charger</button>
+            <button onclick="loadGame(${game.id})" class="load-btn">
+                <i class="fas fa-play"></i>
+            </button>
             <button onclick="deleteGame(${game.id})" class="delete-btn">
                 <i class="fas fa-trash"></i>
             </button>

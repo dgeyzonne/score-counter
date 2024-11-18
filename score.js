@@ -3,11 +3,13 @@ let selectedColor = null;
 let totalPointsPerRound = null;
 let selectedPlayers = [];
 let gameName = null;
+let currentGameId = null;
+let games = null;
 
 document.addEventListener("DOMContentLoaded", function () {
+    games = JSON.parse(localStorage.getItem('games')) || [];
     currentGameId = localStorage.getItem('currentGameId');
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    const currentGame = games.find(game => game.id === currentGameId);
+    const currentGame = getCurrentGame();
 
     if (currentGame == null || !currentGame.name) {
         openGameNameModal();
@@ -26,26 +28,17 @@ function validateGameName() {
         return;
     }
 
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    let currentGame = games.find(game => game.id === currentGameId);
+    let currentGame = getCurrentGame();
     let isNewGame = false;
 
     if (currentGame == null) {
         isNewGame = true;
-        currentGame = {
-            id: currentGameId,
-            name: gameName,
-            players: [],
-            isInverseMode: isInverseMode
-        };
-
-        games.push(currentGame);
+        currentGame = newGame(gameName, [], isInverseMode);
     } else {
         currentGame.name = gameName;
+        localStorage.setItem('games', JSON.stringify(games));
     }
 
-    // Sauvegarde la liste des parties dans localStorage
-    localStorage.setItem('games', JSON.stringify(games));
     closeGameNameModal();
 
     if (isNewGame) {
@@ -55,10 +48,36 @@ function validateGameName() {
     }
 }
 
+function getCurrentGame() {
+    return games.find(game => game.id === currentGameId);
+}
+
+function newGame(gameName, players, isInverseMode) {
+    let newGame = {
+        id: currentGameId,
+        name: gameName,
+        players: players,
+        isInverseMode: isInverseMode
+    };
+
+    games.push(newGame);
+    localStorage.setItem('games', JSON.stringify(games));
+
+    return newGame;
+}
+
 function selectColor(color) {
     selectedColor = color;
     document.querySelectorAll('.color-picker div').forEach(div => div.classList.remove('selected'));
     document.querySelector(`.color-picker div[style="background-color: ${color};"]`).classList.add('selected');
+}
+
+/**
+ * Supprime les caratères interdits
+ */
+function filterPlayerNameInput(input) {
+    const forbiddenChars = /['"<>]/g;
+    input.value = input.value.replace(forbiddenChars, '');
 }
 
 function addNewPlayer() {
@@ -93,22 +112,55 @@ function addPlayerToTable(player) {
     const headerRow = table.querySelector("thead tr");
     const totalRow = table.querySelector("tfoot tr");
 
-    const newHeaderCell = document.createElement("th");
-    newHeaderCell.className = "player-header";
-    newHeaderCell.style.backgroundColor = player.color;
-    newHeaderCell.innerHTML = `
-                <input class="input-cell" type="text" value="${player.name}" onchange="updatePlayerName(this)" />`;
+    const newHeaderCell = createHeaderCell(player);
     headerRow.appendChild(newHeaderCell);
 
     const bodyRows = table.querySelectorAll("tbody tr");
     bodyRows.forEach(row => {
-        const newCell = row.insertCell(-1);
+        const newCell = row.insertCell();
         newCell.innerHTML = `<input class="input-cell" type="number" value="" onchange="updateScore()">`;
     });
 
     const newTotalCell = document.createElement("td");
     newTotalCell.innerHTML = `<span>0</span>`;
     totalRow.appendChild(newTotalCell);
+}
+
+function createHeaderCell(player) {
+    const newHeaderCell = document.createElement("th");
+    newHeaderCell.className = "player-header";
+    newHeaderCell.style.backgroundColor = player.color;
+    newHeaderCell.innerHTML = `<span class="header-player-name">${player.name}</span>`;
+    newHeaderCell.addEventListener("click", function() {
+        let removeButton = newHeaderCell.querySelector(".header-player-delete-btn");
+        if (!removeButton) {
+            // Ajoute le bouton de suppression s'il n'est pas déjà présent
+            removeButton = document.createElement("span");
+            removeButton.className = "header-player-delete-btn";
+            removeButton.innerHTML = `
+                    <button onclick="deletePlayerFromCurrentGame(event, '${player.name}', '${player.color}')" class="delete-btn small-button">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+
+            newHeaderCell.appendChild(removeButton);
+        } else {
+            newHeaderCell.removeChild(removeButton);
+        }
+    });
+
+    return newHeaderCell;
+}
+
+function deletePlayerFromCurrentGame(event, name, color) {
+    event.stopPropagation();
+
+    const currentGame = getCurrentGame();
+    currentGame.players = currentGame.players.filter(player => player.name != name && player.color != color);
+    // Sauvegarde la liste des parties dans localStorage
+    localStorage.setItem('games', JSON.stringify(games));
+
+    loadScores(currentGame);
 }
 
 function addRound() {
@@ -122,7 +174,7 @@ function addRound() {
     roundCell.innerHTML = `#${roundIndex}`;
 
     for (let i = 1; i < headerRow.cells.length; i++) {
-        const newCell = newRow.insertCell(-1);
+        const newCell = newRow.insertCell();
         newCell.innerHTML = `<input class="input-cell" type="number" value="" onchange="updateScore()">`;
     }
 }
@@ -273,7 +325,7 @@ function openRankingModal() {
     const table = document.getElementById("scoreTable");
     const rows = table.querySelectorAll("tfoot tr td span");
     const players = Array.from(rows).map((span, index) => ({
-        name: table.querySelector(`thead th:nth-child(${index + 2}) input`).value,
+        name: table.querySelector(`thead th:nth-child(${index + 2}) .header-player-name`).innerText,
         score: parseInt(span.innerText),
         color: table.querySelector(`thead th:nth-child(${index + 2})`).style.backgroundColor
     }));
@@ -313,21 +365,13 @@ function closeOptionsModal() {
     document.getElementById('optionsModal').style.display = 'none';
 }
 
-function updatePlayerName(input) {
-    const headerCell = input.closest('th');
-    const index = Array.from(headerCell.parentNode.children).indexOf(headerCell);
-    const totalCells = document.querySelectorAll(`#scoreTable tfoot tr td:nth-child(${index + 2}) span`);
-    totalCells.forEach(cell => cell.innerText = 0);
-    updateScore();
-}
-
 function saveScores() {
     const table = document.getElementById("scoreTable");
     const players = [];
 
     const headerCells = table.querySelectorAll("thead th.player-header");
     headerCells.forEach((headerCell, index) => {
-        const playerName = headerCell.querySelector("input").value;
+        const playerName = headerCell.querySelector(".header-player-name").innerText;
         const playerColor = rgbToHex(headerCell.style.backgroundColor);
         const playerScores = Array.from(table.querySelectorAll(`tbody tr td:nth-child(${index + 2}) input`))
             .map(input => input.value == "0" ? 0 : parseInt(input.value) || null);
@@ -338,26 +382,16 @@ function saveScores() {
             scores: playerScores
         });
     });
-    
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    const currentGame = games.find(game => game.id === currentGameId);
+
+    const currentGame = getCurrentGame();
 
     if (currentGame == null) {
-        const gameData = {
-            id: currentGameId,
-            name: gameName,
-            players: players,
-            isInverseMode: isInverseMode
-        };
-
-        games.push(gameData);
+        newGame(gameName, players, isInverseMode);
     } else {
         currentGame.players = players;
         currentGame.isInverseMode = isInverseMode;
+        localStorage.setItem('games', JSON.stringify(games));
     }
-
-    // Sauvegarde la liste des parties dans localStorage
-    localStorage.setItem('games', JSON.stringify(games));
 }
 
 function rgbToHex(col) {
@@ -387,17 +421,14 @@ function loadScores(currentGame) {
 
         currentGame.players.forEach(player => {
             // Ajouter les headers pour chaque joueur
-            const newHeaderCell = document.createElement("th");
-            newHeaderCell.className = "player-header";
-            newHeaderCell.style.backgroundColor = player.color;
-            newHeaderCell.innerHTML = `<input class="input-cell" type="text" value="${player.name}" onchange="updatePlayerName(this)" />`;
+            const newHeaderCell = createHeaderCell(player);
             headerRow.appendChild(newHeaderCell);
 
             // Ajouter les scores pour chaque round
             player.scores.forEach((score, roundIndex) => {
                 if (body.rows[roundIndex]) {
-                    const newCell = body.rows[roundIndex].insertCell(-1);
-                    newCell.innerHTML = `<input class="input-cell" type="number" value="${score}" onchange="updateScore()">`;
+                    const newCell = body.rows[roundIndex].insertCell();
+                    newCell.innerHTML = `<input class="input-cell" type="number" value="${score !== null ? score : ''}" onchange="updateScore()">`;
                 } else {
                     const newRow = document.createElement("tr");
                     const roundLabel = document.createElement("td");
@@ -405,7 +436,7 @@ function loadScores(currentGame) {
                     newRow.appendChild(roundLabel);
 
                     const newCell = document.createElement("td");
-                    newCell.innerHTML = `<input class="input-cell" type="number" value="${score}" onchange="updateScore()">`;
+                    newCell.innerHTML = `<input class="input-cell" type="number" value="${score !== null ? score : ''}" onchange="updateScore()">`;
                     newRow.appendChild(newCell);
 
                     body.appendChild(newRow);
@@ -435,8 +466,7 @@ function loadAvailablePlayers() {
     let players = JSON.parse(localStorage.getItem('players')) || [];
 
     // on n'affiche pas les joueurs déjà ajoutés au tableau, ni ceux sélectionnés
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    const currentGame = games.find(game => game.id === currentGameId);
+    const currentGame = getCurrentGame();
     players = players.filter(player => (currentGame == null || !currentGame.players.some(currentPlayer => currentPlayer.name == player.name && rgbToHex(currentPlayer.color) == player.color))
         && !selectedPlayers.some(selectedPlayer => selectedPlayer.name == player.name && selectedPlayer.color == player.color));
     
@@ -472,8 +502,7 @@ function loadSelectedPlayers() {
     selectedPlayersList.innerHTML = '';
 
     // on n'affiche pas les joueurs déjà ajoutés au tableau
-    const games = JSON.parse(localStorage.getItem('games')) || [];
-    const currentGame = games.find(game => game.id === currentGameId);
+    const currentGame = getCurrentGame();
     if (currentGame != null) {
         selectedPlayers = selectedPlayers.filter(selectedPlayer => !currentGame.players.some(player => player.name == selectedPlayer.name && rgbToHex(player.color) == selectedPlayer.color));
     }

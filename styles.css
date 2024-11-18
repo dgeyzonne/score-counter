@@ -40,8 +40,8 @@ th {
     color: #fff;
 }
 
-th.player-header {
-    background-color: transparent;
+.header-player-name {
+    font-size: small;
 }
 
 td {
@@ -94,7 +94,7 @@ button {
 .new-game-btn:hover,
 .ok-btn:hover,
 .load-btn:hover {
-    background-color: #45a049;
+    background-color: #327536;
 }
 
 .toggle-score-btn {
@@ -152,6 +152,10 @@ button {
 .invalid-score {
     font-weight: bold;
     color: orange !important;
+}
+
+.score-header {
+    height: 55px;
 }
 
 .fixed-header {
