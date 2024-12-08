@@ -6,6 +6,7 @@ let gameName = null;
 let currentGameId = null;
 let games = null;
 let playerToDelete = null;
+let roundToDelete = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     games = JSON.parse(localStorage.getItem('games')) || [];
@@ -173,15 +174,27 @@ function addRound() {
     const headerRow = document.getElementById("scoreTable").querySelector("thead tr");
 
     const newRow = table.insertRow();
-    const roundIndex = table.rows.length;
+    const roundIndex = table.rows.length - 1;
 
     const roundCell = newRow.insertCell(0);
-    roundCell.innerHTML = `#${roundIndex}`;
+    roundCell.innerHTML = `#${roundIndex + 1}`;
+    newRoundCell(roundCell, roundIndex);
 
     for (let i = 1; i < headerRow.cells.length; i++) {
         const newCell = newRow.insertCell();
         newCell.innerHTML = `<input class="input-cell" type="number" value="" onchange="updateScore()">`;
     }
+}
+
+function deleteRound() {
+    const currentGame = getCurrentGame();
+    currentGame.players.forEach(player => player.scores.splice(roundToDelete, 1));
+    // Sauvegarde la liste des parties dans localStorage
+    localStorage.setItem('games', JSON.stringify(games));
+
+    roundToDelete = null;
+    closeDeleteRoundModal();
+    loadScores(currentGame);
 }
 
 function updateScore() {
@@ -339,6 +352,16 @@ function closeDeletePlayerFromCurrentGameModal() {
     document.getElementById('deletePlayerFromCurrentGameModal').style.display = 'none';
 }
 
+function openDeleteRoundModal(event, roundIndex) {
+    event.stopPropagation();
+    roundToDelete = roundIndex;
+    document.getElementById('deleteRoundModal').style.display = 'flex';
+}
+
+function closeDeleteRoundModal() {
+    document.getElementById('deleteRoundModal').style.display = 'none';
+}
+
 function openRankingModal() {
     const currentGame = getCurrentGame();
     const rankingModalTitle = document.getElementById('rankingModalTitle');
@@ -455,6 +478,7 @@ function loadScores(currentGame) {
                     const newRow = document.createElement("tr");
                     const roundLabel = document.createElement("td");
                     roundLabel.textContent = `#${roundIndex + 1}`;
+                    newRoundCell(roundLabel, roundIndex);
                     newRow.appendChild(roundLabel);
 
                     const newCell = document.createElement("td");
@@ -476,6 +500,26 @@ function loadScores(currentGame) {
         document.querySelector(".toggle-score-btn").textContent = isInverseMode ? "Inversé" : "Classique";
         highlightBestScore();
     }
+}
+
+function newRoundCell(cell, roundIndex) {
+    cell.addEventListener("click", function () {
+        let removeButton = cell.querySelector(".delete-round-btn");
+        if (!removeButton) {
+            // Ajoute le bouton de suppression s'il n'est pas déjà présent
+            removeButton = document.createElement("span");
+            removeButton.className = "delete-round-btn";
+            removeButton.innerHTML = `
+                    <button onclick="openDeleteRoundModal(event, ${roundIndex})" class="delete-btn small-button">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+
+            cell.appendChild(removeButton);
+        } else {
+            cell.removeChild(removeButton);
+        }
+    });
 }
 
 function loadPlayers() {
