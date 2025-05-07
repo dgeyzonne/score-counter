@@ -1,3 +1,5 @@
+let gameToDelete = null;
+
 document.addEventListener("DOMContentLoaded", function() {
     loadGamesList();
 });
@@ -41,7 +43,7 @@ function loadGamesList() {
             <button onclick="loadGame(${game.id})" class="load-btn">
                 <i class="fas fa-play"></i>
             </button>
-            <button onclick="deleteGame(${game.id})" class="delete-btn">
+            <button onclick="openDeleteGameModal(event, ${game.id})" class="delete-btn">
                 <i class="fas fa-trash"></i>
             </button>
         `;
@@ -57,12 +59,26 @@ function loadGame(gameId) {
     location.href = 'score.html';
 }
 
-function deleteGame(gameId) {
+function deleteGame() {
     const games = JSON.parse(localStorage.getItem('games')) || [];
-    const updatedGames = games.filter(game => game.id != gameId && isNumeric(game.id));
+    const updatedGames = games.filter(game => game.id != gameToDelete && isNumeric(game.id));
 
     localStorage.setItem('games', JSON.stringify(updatedGames));
+
+    gameToDelete = null;
+    closeDeleteGameModal();
+
     loadGamesList(); // Recharger la liste des parties
+}
+
+function openDeleteGameModal(event, gameId) {
+    event.stopPropagation();
+    gameToDelete = gameId;
+    document.getElementById('deleteGameModal').style.display = 'flex';
+}
+
+function closeDeleteGameModal() {
+    document.getElementById('deleteGameModal').style.display = 'none';
 }
 
 function isNumeric(str) {

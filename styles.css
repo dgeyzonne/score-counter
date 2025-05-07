@@ -114,12 +114,14 @@ button {
 }
 
 .options-btn,
-.game-list-btn {
+.game-list-btn,
+.download-btn {
     background-color: #3498db;
 }
 
 .options-btn:hover,
-.game-list-btn:hover {
+.game-list-btn:hover,
+.download-btn:hover {
     background-color: #2980b9;
 }
 

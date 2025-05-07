@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="score.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="horizontal-buttons">
@@ -116,6 +117,16 @@
             <h2 id="rankingModalTitle"></h2>
             <div id="rankingList" class="modal-content-body"></div>
             <button class="cancel-btn" onclick="closeRankingModal()">Fermer</button>
+            <button class="download-btn" onclick="downloadScore()">Partager</button>
+        </div>
+    </div>
+
+    <!-- Modal pour la suppression d'un joueur -->
+    <div id="deletePlayerModal" class="modal">
+        <div class="modal-content">
+            <p>Êtes-vous sûr de vouloir supprimer ce joueur ?</p>
+            <button class="ok-btn" onclick="deletePlayer()">Oui</button>
+            <button class="cancel-btn" onclick="closeDeletePlayerModal()">Annuler</button>
         </div>
     </div>
 
@@ -148,7 +159,7 @@
                     </tr>
                     <tr>
                         <td>Points total par tour (optionnel) :</td>
-                        <td><input type="number" onchange="updateTotalPointsPerRound(this)" /></td>
+                        <td><input id="total-point-per-round-input" type="number" onchange="updateTotalPointsPerRound(this)" /></td>
                     </tr>
                 </table>
             </div>

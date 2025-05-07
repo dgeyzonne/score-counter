@@ -35,7 +35,7 @@ function validateGameName() {
 
     if (currentGame == null) {
         isNewGame = true;
-        currentGame = newGame(gameName, [], isInverseMode);
+        currentGame = newGame(gameName, [], isInverseMode, totalPointsPerRound);
     } else {
         currentGame.name = gameName;
         localStorage.setItem('games', JSON.stringify(games));
@@ -58,12 +58,13 @@ function getCurrentGame() {
     return games.find(game => game.id === currentGameId);
 }
 
-function newGame(gameName, players, isInverseMode) {
+function newGame(gameName, players, isInverseMode, totalPointsPerRound) {
     let newGame = {
         id: currentGameId,
         name: gameName,
         players: players,
-        isInverseMode: isInverseMode
+        isInverseMode: isInverseMode,
+        totalPointsPerRound: totalPointsPerRound
     };
 
     games.push(newGame);
@@ -339,6 +340,19 @@ function closeNewPlayerModal() {
     document.getElementById('newPlayerModal').style.display = 'none';
 }
 
+function openDeletePlayerModal(event, playerName, playerColor) {
+    event.stopPropagation();
+
+    let players = JSON.parse(localStorage.getItem('players')) || [];
+    playerToDelete = players.find(player => player.name == playerName && player.color == playerColor);
+
+    document.getElementById('deletePlayerModal').style.display = 'flex';
+}
+
+function closeDeletePlayerModal() {
+    document.getElementById('deletePlayerModal').style.display = 'none';
+}
+
 function openDeletePlayerFromCurrentGameModal(event, playerName, playerColor) {
     event.stopPropagation();
 
@@ -431,10 +445,11 @@ function saveScores() {
     const currentGame = getCurrentGame();
 
     if (currentGame == null) {
-        newGame(gameName, players, isInverseMode);
+        newGame(gameName, players, isInverseMode, totalPointsPerRound);
     } else {
         currentGame.players = players;
         currentGame.isInverseMode = isInverseMode;
+        currentGame.totalPointsPerRound = totalPointsPerRound;
         localStorage.setItem('games', JSON.stringify(games));
     }
 }
@@ -498,7 +513,10 @@ function loadScores(currentGame) {
 
         isInverseMode = currentGame.isInverseMode;
         document.querySelector(".toggle-score-btn").textContent = isInverseMode ? "Inversé" : "Classique";
-        highlightBestScore();
+        totalPointsPerRound = currentGame.totalPointsPerRound;
+        document.querySelector("#total-point-per-round-input").value = totalPointsPerRound;
+
+        updateScore();
     }
 }
 
@@ -549,7 +567,7 @@ function loadAvailablePlayers() {
                 <div class="color-circle" style="background-color: ${player.color};"></div>
                 <span>${player.name}</span>
             </div>
-            <button class="delete-btn small-button" onclick="deletePlayer('${player.name}', '${player.color}')">
+            <button class="delete-btn small-button" onclick="openDeletePlayerModal(event, '${player.name}', '${player.color}')">
                 <i class="fas fa-trash"></i>
             </button>`;
         playersList.appendChild(playerItem);
@@ -594,10 +612,15 @@ function deselectPlayer(name, color) {
     loadPlayers();
 }
 
-function deletePlayer(name, color) {
+function deletePlayer() {
     let players = JSON.parse(localStorage.getItem('players')) || [];
-    players = players.filter(player => player.name != name && player.color != color);
+    players = players.filter(player => player.name != playerToDelete.name && player.color != playerToDelete.color);
+
+    // Sauvegarde la liste des joueurs dans localStorage
     localStorage.setItem('players', JSON.stringify(players));
+
+    playerToDelete = null;
+    closeDeletePlayerModal();
     loadPlayers();
 }
 
@@ -605,6 +628,27 @@ function addSelectedPlayers() {
     selectedPlayers.forEach(selectedPlayer => addPlayerToTable(selectedPlayer));
     updateScore();
     closePlayersModal();
+}
+
+function downloadScore() {
+    const currentGame = getCurrentGame();
+    const currentGameDate = new Date(Number.parseInt(currentGame.id));
+    const fileName = currentGame.name + '_' + currentGameDate.toLocaleString().replaceAll(' ', '_') + '.png';
+
+    const modal = document.getElementById("rankingModal");
+    html2canvas(modal).then(canvas => {
+        canvas.toBlob(blob => {
+            if (!blob) {
+                return;
+            }
+            const link = document.createElement('a');
+
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+    });
 }
 
 function isNumeric(str) {
