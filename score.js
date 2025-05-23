@@ -630,24 +630,53 @@ function addSelectedPlayers() {
     closePlayersModal();
 }
 
-function downloadScore() {
+async function downloadScore() {
     const currentGame = getCurrentGame();
     const currentGameDate = new Date(Number.parseInt(currentGame.id));
     const fileName = currentGame.name + '_' + currentGameDate.toLocaleString().replaceAll(' ', '_') + '.png';
 
-    const modal = document.getElementById("rankingModal");
-    html2canvas(modal).then(canvas => {
-        canvas.toBlob(blob => {
-            if (!blob) {
-                return;
-            }
-            const link = document.createElement('a');
+    const modalContent = document.querySelector("#rankingModal .modal-content");
+    const rect = modal.getBoundingClientRect(); // Taille exacte de la modal
+    const canvas = await html2canvas(modalContent, {
+        backgroundColor: null, // pour fond transparent si nécessaire
+        scrollX: 0,
+        scrollY: 0,
+        width: rect.width,
+        height: rect.height,
+        windowWidth: rect.width,
+        windowHeight: rect.height,
+    });
 
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            link.click();
-            URL.revokeObjectURL(link.href);
-        });
+    canvas.toBlob(async (blob) => {
+        if (!blob) {
+            return;
+        }
+
+        const file = new File([blob], fileName, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    title: "Score-counter",
+                    text: currentGame.name + ' ' + currentGameDate,
+                    files: [file],
+                });
+                return;
+            } catch (err) {
+                console.error("Partage annulé ou erreur:", err);
+            }
+        }
+
+        // FALLBACK : téléchargement
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${currentGame.name} ${currentGameDate}.png`;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 }
 
