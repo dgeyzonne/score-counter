@@ -1,41 +1,37 @@
 let gameToDelete = null;
+let asc = false;
+let sortColumn = 0;
+let sortState = {};
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     loadGamesList();
 });
 
 function loadGamesList() {
-    const games = JSON.parse(localStorage.getItem('games')) || [];
+    let games = JSON.parse(localStorage.getItem('games')) || [];
     const tbody = document.getElementById('gamesTable').querySelector('tbody');
 
     tbody.innerHTML = ''; // Vider le contenu existant
 
-    // Trier les parties par date (plus récentes en premier)
-    games.sort((a, b) => b.id - a.id);
+    addBestAndWorstPlayerByGame(games);
+
+    // Tri des parties
+    sortGames(games);
 
     games.forEach(game => {
         const tr = document.createElement('tr');
 
         const gameNameTd = document.createElement('td');
-        gameNameTd.innerHTML = `${game.name}<span class="game-date">${new Date(Number.parseInt(game.id)).toLocaleString()}<span>`;
+        gameNameTd.innerHTML = `${game.name}<span class="small-text">${new Date(Number.parseInt(game.id)).toLocaleString()}<span>`;
         tr.appendChild(gameNameTd);
 
-        // Calculer le meilleur joueur en fonction du mode
-        const bestPlayer = game.players.reduce((best, player) => {
-            const totalPlayerScore = player.scores.reduce((sum, score) => sum + score, 0);
+        const bestPlayerTd = document.createElement('td');
+        bestPlayerTd.innerHTML = `${game.bestPlayer.name}<span class="small-text">${game.bestPlayer.totalScore}<span>`;
+        tr.appendChild(bestPlayerTd);
 
-            if (game.isInverseMode) {
-                // Mode Inversé : Le joueur avec le score le plus bas est le meilleur
-                return totalPlayerScore < best.score ? { name: player.name, score: totalPlayerScore } : best;
-            } else {
-                // Mode Classique : Le joueur avec le score le plus élevé est le meilleur
-                return totalPlayerScore > best.score ? { name: player.name, score: totalPlayerScore } : best;
-            }
-        }, { name: '', score: game.isInverseMode ? Infinity : 0 });
-
-        const playersTd = document.createElement('td');
-        playersTd.textContent = bestPlayer.name;
-        tr.appendChild(playersTd);
+        const worstPlayerTd = document.createElement('td');
+        worstPlayerTd.innerHTML = `${game.worstPlayer.name}<span class="small-text">${game.worstPlayer.totalScore}<span>`;
+        tr.appendChild(worstPlayerTd);
 
         const actionsTd = document.createElement('td');
         actionsTd.className = 'actions-td';
@@ -47,11 +43,90 @@ function loadGamesList() {
                 <i class="fas fa-trash"></i>
             </button>
         `;
-    
+
         tr.appendChild(actionsTd);
 
         tbody.appendChild(tr);
     });
+}
+
+function addBestAndWorstPlayerByGame(games) {
+    games.forEach(game => {
+        // Calculer le meilleur joueur
+        const bestPlayer = game.players.reduce((best, player) => {
+            const totalPlayerScore = player.scores.reduce((sum, score) => sum + score, 0);
+
+            if (game.isInverseMode) {
+                // Mode Inversé : Le joueur avec le score le plus bas est le meilleur
+                return totalPlayerScore < best.totalScore ? {name: player.name, totalScore: totalPlayerScore} : best;
+            } else {
+                // Mode Classique : Le joueur avec le score le plus élevé est le meilleur
+                return totalPlayerScore > best.totalScore ? {name: player.name, totalScore: totalPlayerScore} : best;
+            }
+        }, {name: '', totalScore: game.isInverseMode ? Infinity : 0});
+
+        // Calculer le plus mauvais joueur
+        const worstPlayer = game.players.reduce((worst, player) => {
+            const totalPlayerScore = player.scores.reduce((sum, score) => sum + score, 0);
+
+            if (game.isInverseMode) {
+                // Mode Inversé : Le joueur avec le score le plus bas est le plus mauvais
+                return totalPlayerScore > worst.totalScore ? {name: player.name, totalScore: totalPlayerScore} : worst;
+            } else {
+                // Mode Classique : Le joueur avec le score le plus élevé est le plus mauvais
+                return totalPlayerScore < worst.totalScore ? {name: player.name, totalScore: totalPlayerScore} : worst;
+            }
+        }, {name: '', totalScore: game.isInverseMode ? 0 : Infinity});
+
+        game.bestPlayer = bestPlayer;
+        game.worstPlayer = worstPlayer;
+    });
+}
+
+function sortGames(games) {
+    if (sortColumn === 0) {
+        if (asc) {
+            // Trie les parties par date croissante
+            games.sort((a, b) => a.id - b.id);
+        } else {
+            // Trie les parties par date décroissante
+            games.sort((a, b) => b.id - a.id);
+        }
+    } else if (sortColumn === 1) {
+        if (asc) {
+            // Trie les parties par meilleur score (plus petits scores en premier)
+            games.sort((a, b) => a.bestPlayer.totalScore - b.bestPlayer.totalScore);
+        } else {
+            // Trie les parties par meilleur score (plus gros scores en premier)
+            games.sort((a, b) => b.bestPlayer.totalScore - a.bestPlayer.totalScore);
+        }
+    } else if (sortColumn === 2) {
+        if (asc) {
+            // Trie les parties par plus mauvais score (plus petits scores en premier)
+            games.sort((a, b) => a.worstPlayer.totalScore - b.worstPlayer.totalScore);
+        } else {
+            // Trie les parties par plus mauvais score (plus gros scores en premier)
+            games.sort((a, b) => b.worstPlayer.totalScore - a.worstPlayer.totalScore);
+        }
+    }
+}
+
+function sortTable(columnIndex, headerCell) {
+    sortColumn = columnIndex;
+
+    // Inverser ou initialiser la direction
+    sortState[sortColumn] = !sortState[sortColumn];
+
+    asc = sortState[sortColumn];
+
+    // Réinitialise les flèches
+    document.querySelectorAll("th .arrow").forEach(span => span.innerHTML = "&#9662;");
+
+    // Met à jour la flèche de la colonne cliquée
+    const arrow = headerCell.querySelector(".arrow");
+    arrow.innerHTML = asc ? "&#9652;" : "&#9662;";
+
+    loadGamesList();
 }
 
 function loadGame(gameId) {

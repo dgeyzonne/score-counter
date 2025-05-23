@@ -1,6 +1,6 @@
 {
-  "name": "Score-Counter",
-  "short_name": "Score-counter",
+  "name": "G@me-Points",
+  "short_name": "G@me-Points",
   "description": "Compteur de points",
   "start_url": "index.html",
   "icons": [

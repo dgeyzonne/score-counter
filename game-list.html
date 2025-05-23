@@ -15,8 +15,9 @@
         <table id="gamesTable">
             <thead>
                 <tr class="fixed-header">
-                    <th>Partie</th>
-                    <th>Meilleur Joueur</th>
+                    <th onclick="sortTable(0, this)">Partie <span class="arrow">&#9662;</span></th>
+                    <th onclick="sortTable(1, this)">Meilleur Joueur <span class="arrow">&#9662;</span></th>
+                    <th onclick="sortTable(2, this)">Plus mauvais Joueur <span class="arrow">&#9662;</span></th>
                     <th>Actions</th>
                 </tr>
             </thead>

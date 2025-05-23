@@ -388,7 +388,7 @@ footer {
     transform: translateY(-80%) rotate(30deg);
 }
 
-.game-date {
+.small-text {
     font-size: small;
     display: block;
 }
