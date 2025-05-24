@@ -636,7 +636,7 @@ async function downloadScore() {
     const fileName = currentGame.name + '_' + currentGameDate.toLocaleString().replaceAll(' ', '_') + '.png';
 
     const modalContent = document.querySelector("#rankingModal .modal-content");
-    const rect = modal.getBoundingClientRect(); // Taille exacte de la modal
+    const rect = modalContent.getBoundingClientRect(); // Taille exacte de la modal
     const canvas = await html2canvas(modalContent, {
         backgroundColor: null, // pour fond transparent si nécessaire
         scrollX: 0,
@@ -660,23 +660,24 @@ async function downloadScore() {
                     title: "Score-counter",
                     text: currentGame.name + ' ' + currentGameDate,
                     files: [file],
+                }).catch(err => {
+                    console.error("Partage annulé ou erreur:", err);
                 });
-                return;
             } catch (err) {
                 console.error("Partage annulé ou erreur:", err);
             }
+        } else {
+            // FALLBACK : téléchargement
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${currentGame.name} ${currentGameDate}.png`;
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
-
-        // FALLBACK : téléchargement
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${currentGame.name} ${currentGameDate}.png`;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     });
 }
 
