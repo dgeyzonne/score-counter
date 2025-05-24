@@ -7,6 +7,15 @@ function newGame() {
     location.href = 'score.html';
 }
 
+function showVersion() {
+    const version = document.getElementById('version');
+    version.classList.add('show');
+
+    setTimeout(() => {
+        version.classList.remove('show');
+    }, 3000); // Disparaît après 3 secondes
+}
+
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
         .then(() => console.log('Service Worker registered!'))

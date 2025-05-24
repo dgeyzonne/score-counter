@@ -73,6 +73,18 @@ button {
     padding: 5px;
 }
 
+.hint {
+    opacity: 0;
+    transition: opacity 0.5s;
+    margin-top: 5px;
+    font-size: small;
+    color: #555;
+}
+
+.hint.show {
+    opacity: 1;
+}
+
 .add-player-btn,
 .add-round-btn,
 .new-game-btn,
