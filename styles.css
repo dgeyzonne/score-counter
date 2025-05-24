@@ -5,10 +5,6 @@ body {
     color: #ffffff;
 }
 
-h1 {
-    margin: 0;
-}
-
 h2 {
     margin-top: 0;
 }
@@ -271,7 +267,7 @@ button {
     width: 50%;
 }
 
-.home-buttons {
+.home {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -279,7 +275,11 @@ button {
     align-items: center;
 }
 
-.home-buttons button {
+.home h1 {
+    margin-bottom: 80px;
+}
+
+.home button {
     font-size: 1.5em;
     padding: 15px 30px;
     border-radius: 8px;
